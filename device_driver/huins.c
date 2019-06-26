@@ -11,23 +11,12 @@
 #include "huins.h"
 
 static int device_open = 0;
+static int cover_screen;
 
 static unsigned char *dot_addr;
 static unsigned char *fnd_addr;
 static unsigned char *led_addr;
 static unsigned char *lcd_addr;
-
-static void huins_clear_device(void)
-{
-	int i;
-	unsigned short space = (' ' << 8) | ' ';
-        for (i = 0; i < 10; i++)
-                outw(0, (unsigned int)dot_addr + i * 2);
-        outw(0, (unsigned int)fnd_addr);
-        outw(0, (unsigned int)led_addr);
-        for (i = 0; i < 32; i += 2)
-                outw(space, (unsigned int)lcd_addr + i);
-}
 
 static int huins_open(struct inode *inode,
                 struct file *file)
@@ -36,6 +25,8 @@ static int huins_open(struct inode *inode,
                 return -EBUSY;
 
         device_open++;
+
+        cover_screen = 0;
 
         huins_clear_device();
         
@@ -47,6 +38,8 @@ static int huins_release(struct inode *inode,
                 struct file *file)
 {
         device_open--;
+
+        cover_screen = 0;
 
         module_put(THIS_MODULE);
         return SUCCESS;
@@ -60,7 +53,19 @@ static long huins_ioctl(struct file *file,
         switch (ioctl_num) {
         case IOCTL_RUN_DEVICE:
                 copy_from_user(&op,
-                                (void __user *)ioctl_param, sizeof(op));
+                                (void __user *)ioctl_param,
+                                sizeof(op));
+                break;
+        case IOCTL_SET_SCREEN_COVER:
+                cover_screen = 1;
+                break;
+        case IOCTL_UNSET_SCREEN_COVER:
+                cover_screen = 0;
+                break;
+        case IOCTL_GET_SCREEN_COVER:
+                copy_to_user((void __user *)ioctl_param,
+                                &cover_screen,
+                                sizeof(cover_screen));
                 break;
         }
 
