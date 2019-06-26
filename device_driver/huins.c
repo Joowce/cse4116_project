@@ -26,8 +26,6 @@ static int huins_open(struct inode *inode,
 
         device_open++;
 
-        cover_screen = 0;
-
         huins_clear_device();
         
         try_module_get(THIS_MODULE);
@@ -38,8 +36,6 @@ static int huins_release(struct inode *inode,
                 struct file *file)
 {
         device_open--;
-
-        cover_screen = 0;
 
         module_put(THIS_MODULE);
         return SUCCESS;
