@@ -102,6 +102,29 @@ static int fb_setUpdateRect(struct framebuffer_device_t* dev,
     return 0;
 }
 
+static void cover_screen(private_module_t *m)
+{
+        char *_fb = (char *)m->frambuffer->base;
+        int fd = open(DEVICE_NAME, O_RDWR);
+        int cover_screen = 0;
+
+        if (fd < 0) {
+                ALOGE("Failed to open huins device driver\n");
+                return;
+        }
+
+        if (ioctl(fd, IOCTL_GET_SCREEN_COVER, &cover_screen)) {
+                ALOGE("Failed to perform ioctl\n");
+                return;
+        }
+
+        if (!cover_screen)
+                return;
+
+        // Do overlay framebuffer w/ cover image
+        return;
+}
+
 static int fb_post(struct framebuffer_device_t* dev, buffer_handle_t buffer)
 {
     if (!buffer)
@@ -128,9 +151,10 @@ static int fb_post(struct framebuffer_device_t* dev, buffer_handle_t buffer)
         m->info.activate = FB_ACTIVATE_VBL;
         m->info.yoffset = offset / m->finfo.line_length;
 
-        // do some stuff here
+        // TODO: do some stuff here
+        cover_screen(m);
 
-        // display current buffer
+        // display current buffer - need to modify frame buffer before this line
         if (ioctl(m->framebuffer->fd, FBIOPAN_DISPLAY, &m->info) == -1) {
             ALOGW("FBIOPAN_DISPLAY failed: %s", strerror(errno));
             m->currentBuffer = buffer;
