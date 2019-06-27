@@ -17,12 +17,15 @@ public class HuinsSystemManager {
     private final IHuinsSystemService service;
     private static HuinsSystemManager huinsManager;
 
+    private boolean listeningState = false;
+
     public static synchronized HuinsSystemManager getHuinsSystemService() {
         if (huinsManager != null) {
             IBinder binder = android.os.ServiceManager.getService(SERVICE_NAME);
             if (binder != null) {
-                IHuinsSystemService HuinsService = IHuinsSystemService.Stub.asInterface(binder);
-                huinsManager = new HuinsSystemManager(HuinsService);
+                IHuinsSystemService huinsService = IHuinsSystemService.Stub.asInterface(binder);
+                huinsManager = new HuinsSystemManager(huinsService);
+                huinsService.init();
             }
         }
         return huinsManager;
@@ -35,9 +38,9 @@ public class HuinsSystemManager {
         this.service = service;
     }
 
-    public void startService () {
+    public void startService() {
         try {
-            service.start();
+            if (!listeningState) service.startToListenSwitch();
         } catch (android.os.RemoteException ex) {
             Log.e(TAG, "service cannot start", ex);
         }
@@ -45,11 +48,45 @@ public class HuinsSystemManager {
 
     public void stopService () {
         try {
-            service.stop();
+            service.end();
         } catch (android.os.RemoteException ex) {
-            Log.e(TAG, "service cannot stop", ex);
+            Log.e(TAG, "service cannot end", ex);
         }
     }
+
+    public void writeDotMatrix(boolean[] matrix) {
+        try{
+            service.writeDotMatrix(matrix);
+        } catch (android.os.RemoteException ex) {
+            Log.e(TAG, "Unable to write Dot Matrix " + matrix.toString(), ex);
+        }
+    }
+
+    public void writeFND(int fnd) {
+        try{
+            service.writeFND(fnd);
+        }catch (android.os.RemoteException ex) {
+            Log.e(TAG, "Unable to write fnd " + fnd, ex);
+        }
+    }
+
+    public void writeLCD(String str) {
+        try{
+            service.writeLCD(str);
+        }catch (android.os.RemoteException ex) {
+            Log.e(TAG, "Unable to write fnd " + str, ex);
+        }
+    }
+
+
+    public void writeLED(boolean[] led) {
+        try{
+            service.writeLED(led);
+        }catch (android.os.RemoteException ex) {
+            Log.e(TAG, "Unable to write led " + led.toString(), ex);
+        }
+    }
+
 
     public HuinsInputReceiver getHuinsInputReceiverInstance(Context context) {
         HuinsInputReceiver receiver = new HuinsInputReceiver();
@@ -59,14 +96,14 @@ public class HuinsSystemManager {
 
 
     public interface HandlerSystemInput {
-        int handleInput(int input);
+        void handleInput(boolean[] input);
     }
 
     public class HuinsInputReceiver extends BroadcastReceiver {
         HandlerSystemInput handler;
         @Override
         public void onReceive(Context context, Intent intent) {
-            int input = intent.getIntExtra(HuinsInputSender.HUINS_SYSTEM_INPUT, 0);
+            boolean[] input = intent.getBooleanArrayExtra(HuinsInputSender.HUINS_SYSTEM_INPUT);
             handler.handleInput(input);
         }
 
