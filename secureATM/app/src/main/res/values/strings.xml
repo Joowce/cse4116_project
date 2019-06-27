@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">secure ATM</string>
+    <string name="withdrawal">withdrawal</string>
+    <string name="deposit">deposit</string>
+    <string-array name="tasks">
+        <item>withdrawal</item>
+        <item>deposit</item>
+        <item>more</item>
+    </string-array>
+    <string name="main_prompt">please select a service</string>
 </resources>
