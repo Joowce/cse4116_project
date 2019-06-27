@@ -1,32 +1,53 @@
 //
 // Created by 민지우 on 2019-06-27.
 //
-#include <jni.h>
 
-int flag = 0;
+#define LOG_TAG "HuinsSystemService"
+#include "jni.h"
+#include "JNIHelp.h"
+#include "android_runtime/AndroidRuntime.h"
 
-extern "C" JNIEXPORT void JNICALL
-Java_com_dcclab_huinssystemservice_HuinsSystemController_init (
-    JNIEnv *env,
-    jobject thiz
-        ){
+#include <utils/misc.h>
+#include <utils/Log.h>
 
-    /* TODO */
-}
+#include <stdio.h>
 
-extern "C" JNIEXPORT jint JNICALL
-Java_com_dcclab_huinssystemservice_HuinsSystemController_listen(
-    JNIEnv *env,
-    jobject thiz
-        ){
-    /* TODO */
-    return (flag++) < 100 ? 0 : flag;
-}
+namespace android{
+    int flag = 0;
 
-extern "C" JNIEXPORT void JNICALL
-Java_com_dcclab_huinssystemservice_HuinsSystemController_end(
-    JNIEnv *env,
-    jobject thiz
-        ){
-    /* TODO */
-}
+    static void init_native (
+            JNIEnv *env,
+            jobject thiz
+    ){
+
+        /* TODO */
+    }
+
+    static int listen_native(
+            JNIEnv *env,
+            jobject thiz
+    ){
+        /* TODO */
+        return (flag++) < 100 ? 0 : flag;
+    }
+
+    static void end_native(
+            JNIEnv *env,
+            jobject thiz
+    ){
+        /* TODO */
+    }
+
+    static JNINativeMethod method_table[] = {
+            { "init_native", "()V", (void*)init_native },
+            { "end_native", "()V", (void*)end_native },
+            { "listen_native", "()I", (void*)listen_native}
+    };
+
+    int register_android_server_HuinsSystemService(JNIEnv *env){
+        return jniRegisterNativeMethods(env, "", /* TODO java system service class path ex: com/android/server/LightsService */
+                method_table, NELEM(method_table));
+    }
+};
+
+
