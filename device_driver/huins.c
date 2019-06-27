@@ -28,11 +28,15 @@ static unsigned char *dot_addr;
 static unsigned char *fnd_addr;
 static unsigned char *led_addr;
 static unsigned char *lcd_addr;
+static unsigned char *buzzer_addr;
+static unsigned char *motor_addr;
 
 static void update_dot_matrix(int);
 static void update_fnd(int);
 static void update_lcd(char *);
 static void update_led(int);
+static void update_buzzer(int);
+static void update_motor(int);
 static int huins_open(struct inode *, struct file *);
 static int huins_release(struct inode *, struct file *);
 static long huins_ioctl(struct file *, unsigned int, unsigned long);
@@ -111,6 +115,21 @@ static void update_led(int data)
 		data >>= 1;
 	}
 	outw(state, (unsigned int)led_addr);
+}
+
+static void update_buzzer(int data)
+{
+	char state = (char) data & 0xF;
+	outw(state, (unsigned int)buzzer_addr);
+}
+
+static void update_motor(int data)
+{
+	int i, state = data & 0x0F0FFF;
+	for (i = 4; i >= 0; i -= 2) {
+		outw(state & 0xFF, (unsigned int)motor_addr + i);
+		state >>= 1;
+	}
 }
 
 static int huins_open(struct inode *inode,
@@ -201,6 +220,18 @@ static long huins_ioctl(struct file *file,
 				sizeof(data));
 		update_led(data);
                 break;
+        case IOCTL_SET_BUZZER:
+		copy_from_user(&data,
+				(void __user *)ioctl_param,
+				sizeof(data));
+		update_buzzer(data);
+                break;
+        case IOCTL_SET_MOTOR:
+		copy_from_user(&data,
+				(void __user *)ioctl_param,
+				sizeof(data));
+		update_motor(data);
+                break;
         case IOCTL_SET_SCREEN_COVER:
                 cover_screen = 1;
                 break;
@@ -237,6 +268,8 @@ int init_module()
 	led_addr = ioremap(LED_ADDRESS, 0x1);
 	lcd_addr = ioremap(LCD_ADDRESS, 0x32);
 	dot_addr = ioremap(DOT_ADDRESS, 0x10);
+	buzzer_addr = ioremap(BUZZER_ADDRESS, 0x1);
+	motor_addr = ioremap(MOTOR_ADDRESS, 0x4);
         return SUCCESS;
 }
 
@@ -246,6 +279,8 @@ void cleanup_module()
 	iounmap(led_addr);
 	iounmap(lcd_addr);
 	iounmap(dot_addr);
+	iounmap(buzzer_addr);
+	iounmap(motor_addr);
         unregister_chrdev(MAJOR_NUM, DEVICE_NAME);
 }
 
