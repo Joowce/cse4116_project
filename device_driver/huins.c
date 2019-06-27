@@ -36,7 +36,7 @@ static void update_fnd(int);
 static void update_lcd(char *);
 static void update_led(int);
 static void update_buzzer(int);
-static void update_motor(int);
+static void update_motor(int *);
 static int huins_open(struct inode *, struct file *);
 static int huins_release(struct inode *, struct file *);
 static long huins_ioctl(struct file *, unsigned int, unsigned long);
@@ -123,13 +123,15 @@ static void update_buzzer(int data)
 	outw(state, (unsigned int)buzzer_addr);
 }
 
-static void update_motor(int data)
+static void update_motor(int *data)
 {
-	int i, state = data & 0x0F0FFF;
-	for (i = 4; i >= 0; i -= 2) {
-		outw(state & 0xFF, (unsigned int)motor_addr + i);
-		state >>= 1;
-	}
+	unsigned short int state = 0;
+	state = data[0] & 0XF;
+	outw(state, (unsigned int)motor_addr + 4);
+	state = data[1] & 0XF;
+	outw(state, (unsigned int)motor_addr + 2);
+	state = data[2] & 0XFF;
+	outw(state, (unsigned int)motor_addr);
 }
 
 static int huins_open(struct inode *inode,
@@ -196,7 +198,7 @@ static long huins_ioctl(struct file *file,
                 unsigned int ioctl_num,
                 unsigned long ioctl_param)
 {
-	int data;
+	int data, op[3];
 	char buf[32];
 
         switch (ioctl_num) {
@@ -209,7 +211,7 @@ static long huins_ioctl(struct file *file,
 		update_fnd(data);
                 break;
         case IOCTL_SET_LCD:
-		copy_from_user(buf,
+		copy_from_user(&buf,
 				(void __user *)ioctl_param,
 				sizeof(char) * 32);
 		update_lcd(buf);
@@ -227,10 +229,10 @@ static long huins_ioctl(struct file *file,
 		update_buzzer(data);
                 break;
         case IOCTL_SET_MOTOR:
-		copy_from_user(&data,
+		copy_from_user(&op,
 				(void __user *)ioctl_param,
-				sizeof(data));
-		update_motor(data);
+				sizeof(int) * 3);
+		update_motor(op);
                 break;
         case IOCTL_SET_SCREEN_COVER:
                 cover_screen = 1;
