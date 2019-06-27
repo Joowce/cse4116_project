@@ -1,14 +1,22 @@
 /*
  * Copyright (c) 2019 Sanggu Han
  */
+#include <linux/fs.h>
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/string.h>
 #include <linux/device.h>
-#include <linux/fs.h>
-#include <asm/uaccess.h>
+#include <linux/interrupt.h>
 #include <asm/io.h>
+#include <asm/irq.h>
+#include <asm/gpio.h>
+#include <asm/uaccess.h>
 #include "huins.h"
+
+#define GPIO_HOME       IMX_GPIO_NR(1, 11)
+#define GPIO_BACK       IMX_GPIO_NR(1, 12)
+#define GPIO_VOLUP      IMX_GPIO_NR(2, 15)
+#define GPIO_VOLDOWN    IMX_GPIO_NR(5, 14)
 
 static int device_open = 0;
 static int cover_screen;
@@ -18,16 +26,72 @@ static unsigned char *fnd_addr;
 static unsigned char *led_addr;
 static unsigned char *lcd_addr;
 
+static int huins_open(struct node *, struct file *);
+static int huins_release(struct node *, struct file *);
+static long huins_ioctl(struct node *, unsigned int, unsigned long);
+
+irqreturn_t home_handler(int, void *, struct pt_regs *);
+irqreturn_t back_handler(int, void *, struct pt_regs *);
+irqreturn_t volume_up_handler(int, void *, struct pt_regs *);
+irqreturn_t volume_down_handler(int, void *, struct pt_regs *);
+
+irqreturn_t home_handler(int irq, void *dev_id, struct pt_regs *regs)
+{
+        return IRQ_HANDLED;
+}
+
+irqreturn_t back_handler(int irq, void *dev_id, struct pt_regs *regs)
+{
+        return IRQ_HANDLED;
+}
+
+irqreturn_t volume_up_handler(int irq, void *dev_id, struct pt_regs *regs)
+{
+        return IRQ_HANDLED;
+}
+
+irqreturn_t volume_down_handler(int irq, void *dev_id, struct pt_regs *regs)
+{
+        return IRQ_HANDLED;
+}
+
 static int huins_open(struct inode *inode,
                 struct file *file)
 {
+	unsigned long irq_flag = IRQF_TRIGGER_RISING;
+
         if (device_open)
                 return -EBUSY;
 
-        device_open++;
+        gpio_direction_input(GPIO_HOME);
+        irq = gpio_to_irq(GPIO_HOME);
+        ret = request_irq(irq, home_handler,
+                        irq_flag, "HOME_BTN", NULL);
+        if (ret)
+                printk("ERROR: Cannot request IRQ %d\n - code %d\n", irq, ret);
 
-        huins_clear_device();
-        
+        gpio_direction_input(GPIO_BACK);
+        irq = gpio_to_irq(GPIO_BACK);
+        ret = request_irq(irq, back_handler,
+                        irq_flag, "BACK_BTN", NULL);
+        if (ret)
+                printk("ERROR: Cannot request IRQ %d\n - code %d\n", irq, ret);
+
+        gpio_direction_input(GPIO_VOLUP);
+        irq = gpio_to_irq(GPIO_VOLUP);
+        ret = request_irq(irq, volume_up_handler,
+                        irq_flag, "VOLUP_BTN", NULL);
+        if (ret)
+                printk("ERROR: Cannot request IRQ %d\n - code %d\n", irq, ret);
+
+        gpio_direction_input(GPIO_VOLDOWN);
+        irq = gpio_to_irq(GPIO_VOLDOWN);
+        ret = request_irq(irq, volume_down_handler,
+                        irq_flag, "VOLDOWN_BTN", NULL);
+        if (ret)
+                printk("ERROR: Cannot request IRQ %d\n - code %d\n", irq, ret);
+
+        device_open++;
         try_module_get(THIS_MODULE);
         return SUCCESS;
 }
@@ -36,6 +100,11 @@ static int huins_release(struct inode *inode,
                 struct file *file)
 {
         device_open--;
+
+        free_irq(gpio_to_irq(GPIO_HOME), NULL);
+        free_irq(gpio_to_irq(GPIO_BACK), NULL);
+        free_irq(gpio_to_irq(GPIO_VOLUP), NULL);
+        free_irq(gpio_to_irq(GPIO_VOLDOWN), NULL);
 
         module_put(THIS_MODULE);
         return SUCCESS;
