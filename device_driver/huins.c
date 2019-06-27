@@ -2,6 +2,7 @@
  * Copyright (c) 2019 Sanggu Han
  */
 #include <linux/fs.h>
+#include <linux/wait.h>
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/string.h>
@@ -20,6 +21,7 @@
 
 static int device_open = 0;
 static int cover_screen;
+DECLARE_WAIT_QUEUE_HEAD(wait_queue);
 
 static unsigned char *dot_addr;
 static unsigned char *fnd_addr;
@@ -42,6 +44,7 @@ irqreturn_t home_handler(int irq, void *dev_id, struct pt_regs *regs)
 
 irqreturn_t back_handler(int irq, void *dev_id, struct pt_regs *regs)
 {
+        __wake_up(&wait_queue, 1, 1, NULL);
         return IRQ_HANDLED;
 }
 
@@ -62,6 +65,8 @@ static int huins_open(struct inode *inode,
 
         if (device_open)
                 return -EBUSY;
+
+        init_waitqueue_head(&wait_queue);
 
         gpio_direction_input(GPIO_HOME);
         irq = gpio_to_irq(GPIO_HOME);
@@ -114,12 +119,13 @@ static long huins_ioctl(struct file *file,
                 unsigned int ioctl_num,
                 unsigned long ioctl_param)
 {
-	int op;
+        int dummy = 139;
         switch (ioctl_num) {
-        case IOCTL_RUN_DEVICE:
-                copy_from_user(&op,
-                                (void __user *)ioctl_param,
-                                sizeof(op));
+        case IOCTL_SAMPLE:
+                interruptible_sleep_on(&wait_queue);
+                copy_to_user((void __user *)ioctl_param,
+                                &dummy,
+                                sizeof(dummy));
                 break;
         case IOCTL_SET_SCREEN_COVER:
                 cover_screen = 1;
