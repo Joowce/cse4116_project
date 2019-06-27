@@ -1,5 +1,4 @@
-package com.dcclab.huinssystemservice;
-
+package com.android.server.huins;
 
 import android.util.Log;
 
