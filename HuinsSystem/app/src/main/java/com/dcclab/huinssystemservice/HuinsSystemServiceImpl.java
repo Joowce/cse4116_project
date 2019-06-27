@@ -1,12 +1,16 @@
-package com.dcclab.huinssystemservice.server;
+package com.dcclab.huinssystemservice;
 
-import com.dcclab.huinssystemservice.HuinsSystemController;
-import com.dcclab.huinssystemservice.IHuinsSystemService;
+import android.content.Context;
 
-public class HuinsSystemServiceImpl extends IHuinsSystemService.Stub {
+import com.dcclab.huinssystemservice.broadcaster.HuinsInputSender;
+
+
+public class HuinsSystemServiceImpl extends com.dcclab.huinssystemservice.IHuinsSystemService.Stub {
     private HuinsSystemController controller;
+    private HuinsInputSender sender;
+    private Context context;
 
-    private HuinsSystemServiceImpl() {
+    public HuinsSystemServiceImpl(Context context) {
         controller = HuinsSystemController.getInstance();
         controller.setHandler(new HuinsSystemController.HandlerSystemInput(){
             @Override
@@ -15,10 +19,8 @@ public class HuinsSystemServiceImpl extends IHuinsSystemService.Stub {
                 return input < 20 ? 1 : 0;
             }
         });
-    }
-
-    static HuinsSystemServiceImpl getInstance() {
-        return new HuinsSystemServiceImpl();
+        this.context = context;
+        sender = new HuinsInputSender(context);
     }
 
     @Override
@@ -30,5 +32,7 @@ public class HuinsSystemServiceImpl extends IHuinsSystemService.Stub {
         controller.stop();
     }
 
-    private void broadcast(int input) {}
+    private void broadcast(int input) {
+        sender.send(input);
+    }
 }
