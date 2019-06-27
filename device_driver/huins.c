@@ -29,9 +29,9 @@ static unsigned char *fnd_addr;
 static unsigned char *led_addr;
 static unsigned char *lcd_addr;
 
-static int huins_open(struct node *, struct file *);
-static int huins_release(struct node *, struct file *);
-static long huins_ioctl(struct node *, unsigned int, unsigned long);
+static int huins_open(struct inode *, struct file *);
+static int huins_release(struct inode *, struct file *);
+static long huins_ioctl(struct file *, unsigned int, unsigned long);
 
 irqreturn_t home_handler(int, void *, struct pt_regs *);
 irqreturn_t back_handler(int, void *, struct pt_regs *);
@@ -72,6 +72,7 @@ irqreturn_t volume_down_handler(int irq, void *dev_id, struct pt_regs *regs)
 static int huins_open(struct inode *inode,
                 struct file *file)
 {
+	int irq, ret;
 	unsigned long irq_flag = IRQF_TRIGGER_RISING;
 
         if (device_open)
