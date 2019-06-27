@@ -29,6 +29,10 @@ static unsigned char *fnd_addr;
 static unsigned char *led_addr;
 static unsigned char *lcd_addr;
 
+static void update_dot_matrix(int);
+static void update_fnd(int);
+static void update_lcd(char *);
+static void update_led(int);
 static int huins_open(struct inode *, struct file *);
 static int huins_release(struct inode *, struct file *);
 static long huins_ioctl(struct file *, unsigned int, unsigned long);
@@ -67,6 +71,46 @@ irqreturn_t volume_up_handler(int irq, void *dev_id, struct pt_regs *regs)
 irqreturn_t volume_down_handler(int irq, void *dev_id, struct pt_regs *regs)
 {
         return IRQ_HANDLED;
+}
+
+static void update_dot_matrix(int data)
+{
+	//TODO: implement this
+}
+
+static void update_fnd(int data)
+{
+	int i, state = 0;
+	data %= 10000;
+	for (i = 0; i < 4; i++) {
+		state |= (data % 10) << (i * 4);
+		data /= 10;
+	}
+	outw(state, (unsigned int)fnd_addr);
+}
+
+static void update_lcd(char *buf)
+{
+	int i;
+	unsigned short int state;
+	for (i = 0; i < 32; i += 2) {
+		if (!buf[i])
+			buf[i] = ' ';
+		if (!buf[i + 1])
+			buf[i + 1] = ' ';
+		state = (buf[i] << 8) | buf[i + 1];
+		outw(state, (unsigned int)lcd_addr + i);
+	}
+}
+
+static void update_led(int data)
+{
+	int i, state = 0;
+	for (i = 0; i < 8; i++) {
+		state |= (data & 1) << (7 - i);
+		data >>= 1;
+	}
+	outw(state, (unsigned int)led_addr);
 }
 
 static int huins_open(struct inode *inode,
@@ -133,13 +177,29 @@ static long huins_ioctl(struct file *file,
                 unsigned int ioctl_num,
                 unsigned long ioctl_param)
 {
-        int dummy = 139;
+	int data;
+	char buf[32];
+
         switch (ioctl_num) {
-        case IOCTL_SAMPLE:
-                interruptible_sleep_on(&wait_queue);
-                copy_to_user((void __user *)ioctl_param,
-                                &dummy,
-                                sizeof(dummy));
+        case IOCTL_SET_DOT_MATRIX:
+                break;
+        case IOCTL_SET_FND:
+		copy_from_user(&data,
+				(void __user *)ioctl_param,
+				sizeof(data));
+		update_fnd(data);
+                break;
+        case IOCTL_SET_LCD:
+		copy_from_user(buf,
+				(void __user *)ioctl_param,
+				sizeof(char) * 32);
+		update_lcd(buf);
+		break;
+        case IOCTL_SET_LED:
+		copy_from_user(&data,
+				(void __user *)ioctl_param,
+				sizeof(data));
+		update_led(data);
                 break;
         case IOCTL_SET_SCREEN_COVER:
                 cover_screen = 1;
