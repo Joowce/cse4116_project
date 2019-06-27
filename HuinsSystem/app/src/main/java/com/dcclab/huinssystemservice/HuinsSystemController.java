@@ -1,12 +1,21 @@
 package com.dcclab.huinssystemservice;
 
 
+import android.util.Log;
+
 public class HuinsSystemController {
+    private static final String TAG = "HuinsSystemController";
     private HandlerSystemInput handler;
     private Runnable thread;
 
+    private int inputFd;
+    private int outputFd;
+
+    private boolean listeningState;
+
     private HuinsSystemController() {
-        init();
+        inputFd = initInputDevices_native();
+        outputFd = initOutputDevices_native();
     }
 
     static public HuinsSystemController getInstance() {
@@ -17,32 +26,77 @@ public class HuinsSystemController {
         this.handler = handler;
     }
 
-    public void start() {
-        if (thread != null) return;
-
+    public void listenSwitchInput() {
+        if (thread != null && listeningState) {
+            Log.e(TAG, "Already listen switch input");
+            return;
+        }
+        listeningState = true;
         thread = new Runnable() {
+            private boolean[] prev;
             @Override
             public void run () {
-                while(true) {
-                    int input = listen();
-                    if (handler.handleInput(input) <= 0) break;
+                while(listeningState) {
+                    boolean[] input = getSwitchStatus_native(inputFd);
+                    for (int i = 0; i < 9; i++) {
+                        if (prev[i] != input[i]) {
+                            handler.handleInput(input);
+                            break;
+                        }
+                        try{
+                            thread.wait(300);
+                        } catch (java.lang.InterruptedException ex) {
+                            Log.e("Unable to thread wait", ex.getMessage());
+                        }
+                    }
+                    prev = input;
                 }
             }
         };
         thread.run();
     }
 
-    public void stop() {
-        end();
-        thread = null;
+    public void writeDotMatrix(boolean[] matrix){
+        writeDotMatrix_native(outputFd, matrix);
+    }
+
+    public void writeFND(int fnd) {
+        writeFND_native(outputFd, fnd);
+    }
+
+    public void writeLCD(String str) {
+        writeLCD_native(outputFd, str);
+    }
+
+    public void writeLED(boolean[] led) {
+        writeLED_native(outputFd, led);
     }
 
 
-    private native void init();
-    private native int listen();
-    private native void end();
+    public void stop() {
+        listeningState = false;
+
+        endInputDevices_native(inputFd);
+        endOutputDevices_native(outputFd);
+
+        thread = null;
+        inputFd = 0;
+        outputFd = 0;
+    }
+
+//-------------------------------------------------------------------------------------
+
+    private native int initInputDevices_native();
+    private native int initOutputDevices_native();
+    private native boolean[] getSwitchStatus_native(int fd);
+    private native void writeDotMatrix_native(int fd, boolean[] matrix);
+    private native void writeFND_native(int fd, int fnd);
+    private native void writeLCD_native(int fd, String str);
+    private native void writeLED_native(int fd, boolean[] led);
+    private native void endInputDevices_native(int fd);
+    private native void endOutputDevices_native(int fd);
 
     public interface HandlerSystemInput {
-        int handleInput(int input);
+        void handleInput(boolean[] switches);
     }
 }
