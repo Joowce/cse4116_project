@@ -108,7 +108,7 @@ namespace android
         {"finalize_native", "(J)V", (void*)finalize_native},
         {"set_dot_matrix_native", "(I)V", (void *)set_dot_matrix_native},
         {"set_fnd_native", "(I)V", (void *)set_fnd_native},
-        {"set_lcd_native", "([B)V", (void *)set_lcd_native},
+        {"set_lcd_native", "([Z)V", (void *)set_lcd_native},
         {"set_led_native", "(I)V", (void *)set_led_native},
         {"set_buzzer_native", "(I)V", (void *)set_buzzer_native},
         {"set_motor_native", "(III)V", (void *)set_motor_native},
@@ -116,7 +116,7 @@ namespace android
  
     int register_android_server_HuinsService(JNIEnv *env)
     {
-        return jniRegisterNativeMethods(env, "com/android/server/huins_Service",
+        return jniRegisterNativeMethods(env, "com/android/server/HuinsService",
                                         method_table, NELEM(method_table));
     }
  

@@ -1,4 +1,5 @@
 package com.android.server;
+
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
@@ -52,7 +53,7 @@ public class HuinsService extends IhuinsService.Stub
  
     private static native long init_native();
     private static native void finalize_native(long ptr);
-    private static native void set_dot_matix_native(int m);
+    private static native void set_dot_matrix_native(int m);
     private static native void set_fnd_native(int n);
     private static native void set_lcd_native(byte[] buf);
     private static native void set_led_native(int bm);
