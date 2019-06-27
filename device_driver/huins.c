@@ -8,6 +8,7 @@
 #include <linux/string.h>
 #include <linux/device.h>
 #include <linux/interrupt.h>
+#include <linux/workqueue.h>
 #include <asm/io.h>
 #include <asm/irq.h>
 #include <asm/gpio.h>
@@ -37,6 +38,15 @@ irqreturn_t back_handler(int, void *, struct pt_regs *);
 irqreturn_t volume_up_handler(int, void *, struct pt_regs *);
 irqreturn_t volume_down_handler(int, void *, struct pt_regs *);
 
+static work_func_t work_queue_func(void *);
+
+DECLARE_WORK(work_queue, work_queue_func);
+
+static work_func_t work_queue_func(void *data)
+{
+        return SUCCESS;
+}
+
 irqreturn_t home_handler(int irq, void *dev_id, struct pt_regs *regs)
 {
         return IRQ_HANDLED;
@@ -44,6 +54,7 @@ irqreturn_t home_handler(int irq, void *dev_id, struct pt_regs *regs)
 
 irqreturn_t back_handler(int irq, void *dev_id, struct pt_regs *regs)
 {
+        schedule_work(&work_queue);
         __wake_up(&wait_queue, 1, 1, NULL);
         return IRQ_HANDLED;
 }
@@ -110,6 +121,8 @@ static int huins_release(struct inode *inode,
         free_irq(gpio_to_irq(GPIO_BACK), NULL);
         free_irq(gpio_to_irq(GPIO_VOLUP), NULL);
         free_irq(gpio_to_irq(GPIO_VOLDOWN), NULL);
+
+        cancel_work_sync(&work_queue);
 
         module_put(THIS_MODULE);
         return SUCCESS;
