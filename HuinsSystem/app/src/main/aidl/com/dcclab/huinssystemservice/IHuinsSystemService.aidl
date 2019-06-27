@@ -1,5 +1,5 @@
 // IHuinsSystemService.aidl
-package com.dcclab.huinssystemservice;
+package android.os;
 
 // Declare any non-default types here with import statements
 
@@ -9,8 +9,8 @@ interface IHuinsSystemService {
 
     void startToListenSwitch();
 
-    void writeDotMatrix(boolean[] matrix);
+    void writeDotMatrix(in boolean[] matrix);
     void writeFND(int fnd);
-    void writeLED(boolean[] led);
+    void writeLED(in boolean[] led);
     void writeLCD(String str);
 }

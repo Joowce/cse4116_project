@@ -13,7 +13,7 @@
 #define LOG_TAG "HuinsSystemService"
 #include "jni.h"
 #include "JNIHelp.h"
-#include "huins.h"
+#include "com_android_server_huins_HuinsSystemServiceImpl.h"
 #include "android_runtime/AndroidRuntime.h"
 
 #include <utils/misc.h>
@@ -104,7 +104,7 @@ namespace android{
         if (result < 0) {
             ALOGE("Unable to write Dot Matrix");
         }
-        env -> ReleaseBooleanArrayElements(matrix, mat, nullptr);
+        env -> ReleaseBooleanArrayElements(matrix, mat, NULL);
     }
 
     static void writeFND_native(
@@ -125,7 +125,7 @@ namespace android{
             jint fd,
             jstring str
             ){
-        const char* tempStr = env->GetStringUTFChars(str, nullptr);
+        const char* tempStr = env->GetStringUTFChars(str, NULL);
         char finalStr[LCD_MAX_LEN] = {0};
 
         int strLen = strlen(tempStr);
@@ -148,7 +148,7 @@ namespace android{
             jbooleanArray _led
             ) {
         int len = env->GetArrayLength(_led);
-        jboolean* led = env->GetBooleanArrayElements(_led, nullptr);
+        jboolean* led = env->GetBooleanArrayElements(_led, NULL);
         unsigned int mask = 0;
         
         for (int i = 0; i < LED_NUM; i++) {
@@ -156,7 +156,7 @@ namespace android{
             mask |=  (bool)led[i] ? 1 : 0;
         }
         ioctl(fd, IOCTL_SET_LED, &mask);
-        env->ReleaseBooleanArrayElements(_led, led, nullptr);
+        env->ReleaseBooleanArrayElements(_led, led, NULL);
     }
 
     static void endInputDevices_native(
@@ -189,7 +189,7 @@ namespace android{
             { "endOutputDevices_native", "(I)V", (void*)endOutputDevices_native }
     };
 
-    int register_android_server_HuinsSystemService(JNIEnv *env){
+    int register_android_server_huins(JNIEnv *env){
         return jniRegisterNativeMethods(env, "", /* TODO java system service class path ex: com/android/server/LightsService */
                 method_table, NELEM(method_table));
     }

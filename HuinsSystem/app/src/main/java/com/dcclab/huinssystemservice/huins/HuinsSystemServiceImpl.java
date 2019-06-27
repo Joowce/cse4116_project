@@ -1,11 +1,9 @@
-package com.dcclab.huinssystemservice;
+package com.android.server.huins;
 
 import android.content.Context;
 
-import com.dcclab.huinssystemservice.broadcaster.HuinsInputSender;
 
-
-public class HuinsSystemServiceImpl extends com.dcclab.huinssystemservice.IHuinsSystemService.Stub {
+public class HuinsSystemServiceImpl extends android.os.IHuinsSystemService.Stub {
     private HuinsSystemController controller;
     private HuinsInputSender sender;
 

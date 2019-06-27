@@ -1,4 +1,4 @@
-package com.dcclab.huinssystemservice;
+package android.os;
 
 
 import android.content.BroadcastReceiver;
@@ -7,9 +7,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.IBinder;
 import android.util.Log;
+import android.os.IHuinsSystemService;
 
-import com.dcclab.huinssystemservice.IHuinsSystemService;
-import com.dcclab.huinssystemservice.broadcaster.HuinsInputSender;
 
 public class HuinsSystemManager {
     private final static String TAG = HuinsSystemManager.class.getName();
@@ -25,7 +24,11 @@ public class HuinsSystemManager {
             if (binder != null) {
                 IHuinsSystemService huinsService = IHuinsSystemService.Stub.asInterface(binder);
                 huinsManager = new HuinsSystemManager(huinsService);
-                huinsService.init();
+                try {
+                    huinsService.init();
+                } catch (android.os.RemoteException ex) {
+                    Log.e(TAG, "Unable to initialize service");
+                }
             }
         }
         return huinsManager;
@@ -90,7 +93,7 @@ public class HuinsSystemManager {
 
     public HuinsInputReceiver getHuinsInputReceiverInstance(Context context) {
         HuinsInputReceiver receiver = new HuinsInputReceiver();
-        context.registerReceiver(receiver, new IntentFilter(HuinsInputSender.HUINS_SYSTEM_SERVICE));
+        context.registerReceiver(receiver, new IntentFilter("com.android.server.huins"));
         return receiver;
     }
 
@@ -103,7 +106,7 @@ public class HuinsSystemManager {
         HandlerSystemInput handler;
         @Override
         public void onReceive(Context context, Intent intent) {
-            boolean[] input = intent.getBooleanArrayExtra(HuinsInputSender.HUINS_SYSTEM_INPUT);
+            boolean[] input = intent.getBooleanArrayExtra("com.android.server.huins.input");
             handler.handleInput(input);
         }
 

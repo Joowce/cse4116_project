@@ -1,11 +1,11 @@
-package com.dcclab.huinssystemservice.broadcaster;
+package com.android.server.huins;
 
 import android.content.Context;
 import android.content.Intent;
 
 public class HuinsInputSender {
-    public static final String HUINS_SYSTEM_SERVICE = "com.dcclab.huinssystemservice.broadcaster";
-    public static final String HUINS_SYSTEM_INPUT = "com.dcclab.huinssystemservice.broadcaster.systeminput";
+    public static final String HUINS_SYSTEM_SERVICE = "com.android.server.huins";
+    public static final String HUINS_SYSTEM_INPUT = "com.android.server.huins.input";
     Context context;
 
     public HuinsInputSender(Context context) {
