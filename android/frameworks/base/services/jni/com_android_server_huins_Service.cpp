@@ -47,7 +47,7 @@ namespace android
     static void set_dot_matrix_native(JNIEnv *env, jobject clazz, jint m)
     {
         if(huins_dev == NULL)
-            return 0;
+            return;
  
         huins_dev->set_dot_matrix(m);
     }
@@ -55,7 +55,7 @@ namespace android
     static void set_fnd_native(JNIEnv *env, jobject clazz, jint n)
     {
         if(huins_dev == NULL)
-            return 0;
+            return;
  
         huins_dev->set_fnd(n);
     }
@@ -67,7 +67,7 @@ namespace android
         buf = env->GetByteArrayElements(_buf, NULL);
 
         if(huins_dev == NULL)
-            return 0;
+            return;
  
         huins_dev->set_lcd((char *)buf);
 
@@ -77,7 +77,7 @@ namespace android
     static void set_led_native(JNIEnv *env, jobject clazz, jint bm)
     {
         if(huins_dev == NULL)
-            return 0;
+            return;
  
         huins_dev->set_led(bm);
     }
@@ -85,7 +85,7 @@ namespace android
     static void set_buzzer_native(JNIEnv *env, jobject clazz, jint buzz)
     {
         if(huins_dev == NULL)
-            return 0;
+            return;
  
         huins_dev->set_buzzer(buzz);
     }
@@ -97,7 +97,7 @@ namespace android
                         jint speed)
     {
         if(huins_dev == NULL)
-            return 0;
+            return;
  
         huins_dev->set_motor(action, direction, speed);
     }

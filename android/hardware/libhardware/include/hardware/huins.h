@@ -23,7 +23,7 @@ struct huins_device_t {
 	void (*set_led)(int bm);
 	void (*set_buzzer)(int buzz);
 	void (*set_motor)(int action, int direction, int speed); 
-}
+};
 
 /**
  * Every hardware module must have a data structure named HAL_MODULE_INFO_SYM
