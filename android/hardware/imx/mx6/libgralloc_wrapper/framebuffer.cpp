@@ -104,7 +104,7 @@ static int fb_setUpdateRect(struct framebuffer_device_t* dev,
 
 static void cover_screen(private_module_t *m)
 {
-        char *_fb = (char *)m->frambuffer->base;
+        char *_fb = (char *)m->framebuffer->base;
         int fd = open(DEVICE_NAME, O_RDWR);
         int cover_screen = 0;
 
