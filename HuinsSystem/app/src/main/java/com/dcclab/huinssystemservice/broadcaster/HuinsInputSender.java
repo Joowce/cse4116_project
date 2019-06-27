@@ -12,7 +12,7 @@ public class HuinsInputSender {
         this.context = context;
     }
 
-    public void send(int input) {
+    public void send(boolean[] input) {
         Intent intent = new Intent(HUINS_SYSTEM_SERVICE);
         intent.putExtra(HUINS_SYSTEM_INPUT, input);
         context.sendBroadcast(intent);

@@ -8,31 +8,54 @@ import com.dcclab.huinssystemservice.broadcaster.HuinsInputSender;
 public class HuinsSystemServiceImpl extends com.dcclab.huinssystemservice.IHuinsSystemService.Stub {
     private HuinsSystemController controller;
     private HuinsInputSender sender;
-    private Context context;
 
     public HuinsSystemServiceImpl(Context context) {
         controller = HuinsSystemController.getInstance();
         controller.setHandler(new HuinsSystemController.HandlerSystemInput(){
             @Override
-            public int handleInput(int input) {
+            public void handleInput(boolean[] input) {
                 broadcast(input);
-                return input < 20 ? 1 : 0;
             }
         });
-        this.context = context;
         sender = new HuinsInputSender(context);
     }
 
     @Override
-    public void start() {
-        controller.start();
+    public void init() {
+        controller.init();
     }
+
     @Override
-    public void stop() {
+    public void end() {
         controller.stop();
     }
 
-    private void broadcast(int input) {
+    @Override
+    public void startToListenSwitch() {
+        controller.listenSwitchInput();
+    }
+
+    @Override
+    public void writeDotMatrix(boolean[] matrix) {
+        controller.writeDotMatrix(matrix);
+    }
+
+    @Override
+    public void writeFND(int fnd) {
+        controller.writeFND(fnd);
+    }
+
+    @Override
+    public void writeLCD(String str) {
+        controller.writeLCD(str);
+    }
+
+    @Override
+    public void writeLED(boolean[] led) {
+        controller.writeLED(led);
+    }
+
+    private void broadcast(boolean[] input) {
         sender.send(input);
     }
 }

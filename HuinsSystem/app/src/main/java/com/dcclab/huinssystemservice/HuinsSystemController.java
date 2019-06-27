@@ -13,13 +13,13 @@ public class HuinsSystemController {
 
     private boolean listeningState;
 
-    private HuinsSystemController() {
-        inputFd = initInputDevices_native();
-        outputFd = initOutputDevices_native();
-    }
-
     static public HuinsSystemController getInstance() {
         return new HuinsSystemController();
+    }
+
+    public void init() {
+        inputFd = initInputDevices_native();
+        outputFd = initOutputDevices_native();
     }
 
     public void setHandler(HandlerSystemInput handler) {
