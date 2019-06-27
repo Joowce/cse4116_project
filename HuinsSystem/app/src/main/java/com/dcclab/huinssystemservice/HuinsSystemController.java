@@ -5,9 +5,12 @@ public class HuinsSystemController {
     private HandlerSystemInput handler;
     private Runnable thread;
 
-    HuinsSystemController(HandlerSystemInput handler) {
-        setHandler(handler);
+    private HuinsSystemController() {
         init();
+    }
+
+    static public HuinsSystemController getInstance() {
+        return new HuinsSystemController();
     }
 
     public void setHandler(HandlerSystemInput handler) {
