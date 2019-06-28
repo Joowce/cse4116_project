@@ -2,13 +2,13 @@
  * Copyright (c) 2019 Sanggu Han
  */
 #include <linux/fs.h>
-#include <linux/wait.h>
+// #include <linux/wait.h>
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/string.h>
 #include <linux/device.h>
 #include <linux/interrupt.h>
-#include <linux/workqueue.h>
+// #include <linux/workqueue.h>
 #include <asm/io.h>
 #include <asm/irq.h>
 #include <asm/gpio.h>
@@ -22,7 +22,7 @@
 
 static int device_open = 0;
 static int cover_screen;
-DECLARE_WAIT_QUEUE_HEAD(wait_queue);
+// DECLARE_WAIT_QUEUE_HEAD(wait_queue);
 
 static unsigned char *dot_addr;
 static unsigned char *fnd_addr;
@@ -46,14 +46,14 @@ irqreturn_t back_handler(int, void *, struct pt_regs *);
 irqreturn_t volume_up_handler(int, void *, struct pt_regs *);
 irqreturn_t volume_down_handler(int, void *, struct pt_regs *);
 
-static work_func_t work_queue_func(void *);
+// static work_func_t work_queue_func(void *);
 
-DECLARE_WORK(work_queue, work_queue_func);
+// DECLARE_WORK(work_queue, work_queue_func);
 
-static work_func_t work_queue_func(void *data)
-{
-        return SUCCESS;
-}
+/** static work_func_t work_queue_func(void *data) */
+/** { */
+/**         return SUCCESS; */
+/** } */
 
 irqreturn_t home_handler(int irq, void *dev_id, struct pt_regs *regs)
 {
@@ -62,8 +62,8 @@ irqreturn_t home_handler(int irq, void *dev_id, struct pt_regs *regs)
 
 irqreturn_t back_handler(int irq, void *dev_id, struct pt_regs *regs)
 {
-        schedule_work(&work_queue);
-        __wake_up(&wait_queue, 1, 1, NULL);
+        /** schedule_work(&work_queue); */
+        /** __wake_up(&wait_queue, 1, 1, NULL); */
         return IRQ_HANDLED;
 }
 
@@ -143,7 +143,7 @@ static int huins_open(struct inode *inode,
         if (device_open)
                 return -EBUSY;
 
-        init_waitqueue_head(&wait_queue);
+        /** init_waitqueue_head(&wait_queue); */
 
         gpio_direction_input(GPIO_HOME);
         irq = gpio_to_irq(GPIO_HOME);
@@ -188,7 +188,7 @@ static int huins_release(struct inode *inode,
         free_irq(gpio_to_irq(GPIO_VOLUP), NULL);
         free_irq(gpio_to_irq(GPIO_VOLDOWN), NULL);
 
-        cancel_work_sync(&work_queue);
+        // cancel_work_sync(&work_queue);
 
         module_put(THIS_MODULE);
         return SUCCESS;
