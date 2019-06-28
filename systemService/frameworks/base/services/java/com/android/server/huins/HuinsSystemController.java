@@ -71,6 +71,13 @@ public class HuinsSystemController {
         writeLED_native(outputFd, led);
     }
 
+    public void writeBUZZER(int buzz) {
+        writeBUZZER_native(outputFd, buzz);
+    }
+
+    public void writeMOTOR(int action, int direction, int speed) {
+        writeMOTOR_native(outputFd, action, direction, speed);
+    }
 
     public void stop() {
         listeningState = false;
@@ -92,6 +99,8 @@ public class HuinsSystemController {
     private native void writeFND_native(int fd, int fnd);
     private native void writeLCD_native(int fd, String str);
     private native void writeLED_native(int fd, boolean[] led);
+    private native void writeBUZZER_native(int fd, int buzz);
+    private native void writeMOTOR_native(int fd, int action, int direction, int speed);
     private native void endInputDevices_native(int fd);
     private native void endOutputDevices_native(int fd);
 

@@ -13,4 +13,6 @@ interface IHuinsSystemService {
     void writeFND(int fnd);
     void writeLED(in boolean[] led);
     void writeLCD(String str);
+    void writeBUZZER(int buzz);
+    void writeMOTOR(int action, int direction, int speed);
 }

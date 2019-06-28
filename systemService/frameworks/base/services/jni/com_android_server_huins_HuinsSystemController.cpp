@@ -13,7 +13,7 @@
 #define LOG_TAG "HuinsSystemService"
 #include "jni.h"
 #include "JNIHelp.h"
-#include "com_android_server_huins_HuinsSystemServiceImpl.h"
+#include "com_android_server_huins_HuinsSystemController.h"
 #include "android_runtime/AndroidRuntime.h"
 
 #include <utils/misc.h>
@@ -159,6 +159,31 @@ namespace android{
         env->ReleaseBooleanArrayElements(_led, led, NULL);
     }
 
+    static void writeBUZZER_native(
+            JNIEnv *env,
+            jobject thiz,
+            jint fd,
+            jint buzz
+            ) {
+        ioctl(fd, IOCTL_SET_BUZZER, &buzz);
+    }
+
+    static void writeMOTOR_native(
+            JNIEnv *env,
+            jobject thiz,
+            jint fd,
+            jint action,
+            jint direction,
+            jint speed
+            ) {
+        int op[3];
+        op[0] = action;
+        op[1] = direction;
+        op[2] = speed;
+
+        ioctl(fd, IOCTL_SET_MOTOR, op);
+    }
+
     static void endInputDevices_native(
             JNIEnv *env,
             jobject thiz,
@@ -185,12 +210,14 @@ namespace android{
             { "writeFND_native", "(II)V", (void*)writeFND_native },
             { "writeLCD_native", "(ILjava/lang/String;)V", (void*)writeLCD_native },
             { "writeLED_native", "(I[Z)V", (void*)writeLED_native },
+            { "writeBUZZER_native", "(II)V", (void*)writeBUZZER_native },
+            { "writeMOTOR_native", "(IIII)V", (void*)writeMOTOR_native },
             { "endInputDevices_native", "(I)V", (void*)endInputDevices_native },
             { "endOutputDevices_native", "(I)V", (void*)endOutputDevices_native }
     };
 
-    int register_android_server_huins(JNIEnv *env){
-        return jniRegisterNativeMethods(env, "", /* TODO java system service class path ex: com/android/server/LightsService */
+    int register_android_server_HuinsSystemController(JNIEnv *env){
+        return jniRegisterNativeMethods(env, "com/android/server/HuinsSystemController", /* TODO java system service class path ex: com/android/server/LightsService */
                 method_table, NELEM(method_table));
     }
 };
