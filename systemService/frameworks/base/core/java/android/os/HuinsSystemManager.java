@@ -12,7 +12,7 @@ import android.os.IHuinsSystemService;
 
 public class HuinsSystemManager {
     private final static String TAG = HuinsSystemManager.class.getName();
-    private final static String SERVICE_NAME = "HUINS_SYSTEM_SERVICE";
+    private final static String SERVICE_NAME = Context.HUINS_SYSTEM_SERVICE;
     private final IHuinsSystemService service;
     private static HuinsSystemManager huinsManager;
 

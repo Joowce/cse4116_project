@@ -7,5 +7,7 @@
         <item>deposit</item>
         <item>more</item>
     </string-array>
-    <string name="main_prompt">please select a service</string>
+    <string name="main_prompt">Huins System Service</string>
+    <string name="led_button">LED Buttons</string>
+    <string name="enter">Enter</string>
 </resources>
